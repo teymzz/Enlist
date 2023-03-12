@@ -112,7 +112,7 @@ This is a spoova framework package for listing or renaming files in a directory.
    var_dump($result);
    ```
 
-   > Files can be renamed with serial numbers startinf from a specific number using the ```startFrom()``` method
+   > Files can be renamed with serial numbers starting from a specific number using the ```startFrom()``` method
 
    ```php
    $Enlist->source(__DIR__.'/images', ['jpg']);
@@ -128,7 +128,7 @@ This is a spoova framework package for listing or renaming files in a directory.
    $Enlist->source(__DIR__.'/src/images');
    $Enlist->prefix('images-');
    $Enlist->reNumber();
-   $Enlist->rename('jpg');
+   $Enlist->rename('jpg', $result);
    
    var_dump($result);
    ```
@@ -185,9 +185,9 @@ This is a spoova framework package for listing or renaming files in a directory.
    $Enlist->source(__DIR__.'/src/images')->view(); 
    $Enlist->prefix('image-');
    $Enlist->debug(); //turn on debugging without throwing error
-   $result = $Enlist->rename('.');
+   $Enlist->rename('.', $result);
 
-   if($result !== false){
+   if(!$Enlist->debugs()){
 
        var_dump($result);
        
@@ -206,10 +206,16 @@ This is a spoova framework package for listing or renaming files in a directory.
    $Enlist->debug(); //turn on debugging without throwing error
    $Enlist->rename('.', $results);
    $Enlist->debugs($debugs);
+   
+   if(!$debugs){
 
-   var_dump($results);
+     var_dump($results);
 
-   var_dump($debugs);
+   } else {
+
+     var_dump($debugs);
+
+   } 
    ```
 
    > Throwing Errors can be enabled when the debug mode is enabled. This can be done by supplying an argument of ```"2"``` on the ```debug()``` method.
@@ -218,35 +224,8 @@ This is a spoova framework package for listing or renaming files in a directory.
    $Enlist->source(__DIR__.'/src/images')->view(); 
    $Enlist->prefix('image-');
    $Enlist->debug(2); //turn on debugging with ErrorException thrown
-   $result = $Enlist->rename('.');
-
-   if($result !== false){
-
-       var_dump($result);
-       
-   }else{
-           
-       var_dump($Enlist->debugs());
-
-   }
-   ```
-
-   > Get errors with debug mode turned on without throwing errors debugging sample
-
-   ```php
-   $Enlist->source(__DIR__.'/src/images')->view(); 
-   $Enlist->prefix('image-');
-   $result = $Enlist->rename('.');
-
-   if($result !== false){
-
-       var_dump($result);
-
-   }else{
-           
-       var_dump($Enlist->error());
-
-   }
+   $Enlist->rename('.', $result);
+   var_dump($result);
    ```
 
 ### Working with session 
@@ -280,4 +259,4 @@ In certain situations where files are renamed in a way that is not desired or on
    ```
 
 #### Good Practices 
-It is good to always set the renaming to view mode first to check how the final result of a list of renamed files will be before proceeding to rename the item to avoid issues like merging of conflicts which can lead to loss of file. 
+It is always good to set the renaming to view mode first to check how the final result of a list of renamed files will be before proceeding to rename the item to avoid issues like merging of conflicts which can lead to loss of file. 
