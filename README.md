@@ -5,10 +5,10 @@ This is a spoova framework package for listing or renaming files in a directory.
 
 ### Including the Enlist class
 
-   > Run the command below to require the package
+   > Run the command below in the terminal to require the package
 
    ```cmd
-   composer require spoova/enlist;
+   composer require spoova/enlist
    ```
 
 ### Initializing the Enlist class
