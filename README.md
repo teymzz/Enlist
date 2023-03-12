@@ -1,7 +1,7 @@
 
 ## Enlist Package
 
-This is a spoova framework package for listing or renaming files in a directory. It can be used to rename file names and file extensions. While renaming file of extensions can break the functionality of a file, some specific files extensions can be easily modified. Renaming files extensions of files that can be easily broken should be avoided. At most times, this class may be used to change extension of image files or text-related file. Although, some file extensions can be easily modified, yet it does not serve as converter for such files. In the case where a converter is needed, a converter tool should be employed. 
+This is a spoova framework package for listing or renaming files in a directory. It can be used to rename file names and file extensions. While renaming file extensions can break the functionality of a file, some specific files extensions can be easily modified. Renaming files extensions that can be easily broken should be avoided. At most times, this class may be used to change extension of image files or text-related file. Although, some file extensions can be easily modified, yet it does not serve as converter for such files. In the case where a converter is needed, a converter tool should be employed. 
 
 ### Including the Enlist class
 
