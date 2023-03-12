@@ -8,7 +8,7 @@ This is a spoova framework package for listing or renaming files in a directory.
    > Run the command below to require the package
 
    ```cmd
-   composer require Spoova\Enlist;
+   composer require spoova/enlist;
    ```
 
 ### Initializing the Enlist class
