@@ -1,0 +1,19 @@
+{
+    "name": "spoova/enlist",
+    "description": "PHP Package for renaming multiple files",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Spoova\\Enlist\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Akinola Saheed",
+            "email": "teymss@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
