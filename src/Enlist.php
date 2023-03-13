@@ -12,17 +12,17 @@ use Exception;
  */
 class Enlist{
 
-	private $action;
-	private string $url;
+	private $action = '';
+	private string $url = '';
 	private string $prefix = '';
     private bool|int $debug;
 	private bool $active = false;
 	private mixed $error = '';
 	private array|string|null $ext;
 	private int $counter = 1;
-	private $espace;
-	private $reNumber;
-	public bool $smartUrl;
+	private $espace = '';
+	private $reNumber = false;
+	public bool $smartUrl = false;
 	public string $session_name;
     public array $backTrace = [];
 
@@ -45,9 +45,9 @@ class Enlist{
 	 *
 	 * @param string source $url
 	 * @param array|string source $ext
-	 * @return Enlist
+	 * @return bool
 	 */
-	public function source($url, array|string $ext = null) : Enlist {
+	public function source($url, array|string $ext = null) : bool {
        
        if(!$this->processUrl($url)){ return false; }
 
@@ -55,7 +55,7 @@ class Enlist{
 
        $this->active = true;
 
-       return $this; 
+       return true; 
 
 	}
 
@@ -63,10 +63,11 @@ class Enlist{
 	 * Add a prefix to a naming convention
 	 *
 	 * @param string $prefix
-	 * @return void
+	 * @return Enlist
 	 */
-	public function prefix($prefix){
+	public function prefix($prefix) : Enlist {
 		$this->prefix = $prefix;
+        return $this;
 	}
 
 	/**
@@ -98,10 +99,12 @@ class Enlist{
 	/**
 	 * Reduce special character in old file name when renaming
 	 *
-	 * @return void
+     * @param boolean $smart allow smart naming
+	 * @return Enlist
 	 */
-	public function smartUrl(){
-		$this->smartUrl = true;
+	public function smartUrl(bool $smart = true) : Enlist {
+		$this->smartUrl = $smart;
+        return $this;
 	}
 
 	/**
@@ -110,8 +113,8 @@ class Enlist{
 	 * @param boolean $reNumber
 	 * @return Enlist
 	 */
-	public function reNumber($reNumber = true) : Enlist{
-		$this->reNumber = (bool) $reNumber;
+	public function reNumber(bool $reNumber = true) : Enlist{
+		$this->reNumber = $reNumber;
         return $this;
 	}
 
@@ -137,9 +140,27 @@ class Enlist{
 		$url  = $this->url;
 		$files = [];
 		$ext = (array) $extension;
+        $ext = $ext?: ['*'];
+        $dirHidden = [];
+
+        $extCount = count($ext);
+
+        if($extCount > 1){
+
+            if(($extCount === 2) && (in_array('*', $ext) && in_array('.', $ext))){
+                $ext = ['.*'];
+            }elseif(in_array('*', $ext) || in_array('.*', $ext)){
+                $this->error('conflicting contents "'.$ext[0].'" with applied extension name');
+                return [];                
+            }
+
+        }
 
         $dirNormal = glob($url.'/*')?: [];
-        $dirHidden = glob($url.'/.*')?: [];
+
+        if(!empty($ext) && ($ext[0] !== '*')){
+            $dirHidden = array_filter(glob($url.'/.*')?: [], 'is_file');
+        }
 
         $dirFiles = array_merge($dirHidden, $dirNormal);
 
@@ -150,7 +171,7 @@ class Enlist{
 
 			if(!empty($ext) and is_file($ifile)){
 				$fileExt = pathinfo($ifile,PATHINFO_EXTENSION);
-                if(in_array(".*", $ext)){
+                if(in_array(".*", $ext) || in_array("*", $ext)){
 					$files[] = ($fullpath === true)? $ifile : str_replace(str_replace("\\","/",__DIR__.'/'), '', $ifile);
                 }elseif(in_array($fileExt, $ext)){
 					$files[] = ($fullpath === true)? $ifile : str_replace(str_replace("\\","/",__DIR__.'/'), '', $ifile);
@@ -243,7 +264,7 @@ class Enlist{
 
 
             $newfile = ($espace)? preg_replace("/\s+/", $espace, $newfile) : $newfile;
-            if(isset($this->smartUrl)){
+            if($this->smartUrl){
                 //strip off unnecessary characters from url.
                 $newfile = preg_replace('~[^0-9a-z_]+~i', '_', html_entity_decode(preg_replace('~&([a-z]{1,2})(?:acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i', '$1', htmlentities($newfile, ENT_QUOTES, 'UTF-8')), ENT_QUOTES, 'UTF-8'));
                 $newfile = rtrim(preg_replace('/_+/', '_', $newfile),"_");
@@ -258,7 +279,7 @@ class Enlist{
                 if($fileExt && ($fileExt !== pathinfo($newfile, PATHINFO_EXTENSION))) $newfile .= ".".$fileExt;                
                 $lasthChar = substr($newfile, -1);
                 if(in_array($lasthChar, $invalidExts)){
-                    $this->error('invalid character file extension supplied for file "'.$newfile.'" '); 
+                    $this->error('invalid character file extension "'.$lasthChar.'" supplied on "Elist::rename()" for renaming "'.basename($file).'"'); 
                     return false;
                 }                
             }
@@ -266,7 +287,7 @@ class Enlist{
             $lastChar = substr($fileExt, -1);
 
             if(in_array($lastChar, $invalidExts)){
-               $this->error('invalid character file extension supplied for file "'.$newfile.'" '); 
+               $this->error('invalid character file extension "'.$lasthChar.'" supplied on "Elist::rename()" for renaming "'.basename($file).'"'); 
                return false;
             }
             
@@ -281,7 +302,7 @@ class Enlist{
         }elseif(empty($ext)){
 
             if($count == 0){
-                $this->error('The extension names of files to be renamed is not defined!');
+                $this->error('Since "Enlist::source(#2)" has no definitive extension name, "Enlist::rename()" cannot be used');
                 return false;
             }
         }
@@ -293,6 +314,12 @@ class Enlist{
       
 	}
 
+    /**
+     * Sets a session storage key for reversing changes when session is active
+     *
+     * @param string $session_name 
+     * @return Enlist
+     */
     public function withSession(string $session_name) : Enlist {
 
         if(!isset($_SESSION)) session_start();
@@ -338,17 +365,32 @@ class Enlist{
 	 * @return mixed 
      *  - If not modified, default error is returned as a string.
 	 */
-	public function error($error = null){
+	public function error($error = null) : mixed {
         if(func_num_args() > 0){
 
             $this->error = $error;
 
             if(isset($this->debug)) {
-                $backTrace = (debug_backtrace());
-                unset($backTrace[0]);
+                $backTraces = [];
+                $backTrace = (debug_backtrace()); 
+                $coreTraces = [];
+
+                foreach($backTrace as $Trace){
+                    if(isset($Trace['file']) && ($Trace['file'] !== __FILE__)){
+                        $backTraces[] = $Trace;
+                    }else{
+                        $coreTraces[] = $Trace;
+                    }
+                }
+
+                $backTrace = array_merge($backTraces, $coreTraces);
+
                 $backTrace = array_values($backTrace);
+
                 $this->backTrace = ($backTrace);
+
                 if($this->error && ($this->debug === 2)) {
+
                     throw new ErrorException ($backTrace[0]['object']->error, 0, E_USER_NOTICE, $backTrace[0]['file'], $backTrace[0]['line']);
                 }
             }
@@ -364,10 +406,11 @@ class Enlist{
      * @param boolean|integer $debug
      *  - if $debug is set as true, debugging will store all available errors and can be fetched from Enlist::all_errors() method. 
      *  - if $debug is set as 2, an ErrorException will be thrown if error occurs 
-     * @return void
+     * @return Enlist
      */
-    public function debug(bool|int $debug = true){
+    public function debug(bool|int $debug = true) : Enlist {
         $this->debug = $debug;
+        return $this;
     }
 
     /**
