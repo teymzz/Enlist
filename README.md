@@ -265,9 +265,11 @@ This is a spoova framework package for listing or renaming files in a directory.
    > Debugs can also be fetched by supplying a referenced variable into the ```debug()``` method.
 
    ```php
-   $Enlist->debug(); //turn on debugging without throwing error
+   $Enlist->debug(); //turn on debugging without throwing error 
+   
+   $Enlist->source(__DIR__.'/src/images');
 
-   if( $Enlist->source(__DIR__.'/src/images') ) {
+   if( $Enlist->sourceValid() ) {
 
        $Enlist->view(); 
        $Enlist->prefix('image-');
