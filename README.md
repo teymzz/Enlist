@@ -33,12 +33,32 @@ This is a spoova framework package for listing or renaming files in a directory.
    $Enlist->source(__DIR__.'/images');
    ```
 
-### List files in directory
+### Check if file directory is valid
 
-   > The code below will list all files with .jpg files in a directory
+   > We can check if the source directory supplied is valid through the ```sourceValid()``` method
 
    ```php 
-   if( $Enlist->source(__DIR__.'/images') ){
+   $Enlist->source(__DIR__.'/images');
+
+   if($Enlist->sourceValid()) {
+
+     echo "directory is valid";
+
+   } else {
+
+     echo "invalid source directory supplied";
+
+   }
+   ```
+
+### List files in directory
+
+   > The code below will list all files in a directory except hidden files
+
+   ```php 
+   $Enlist->source(__DIR__.'/images');
+
+   if( $Enlist->sourceValid() ) {
        
        $files = $Enlist->dirFiles(); // or $Enlist->dirFiles('*')
        
@@ -56,7 +76,9 @@ This is a spoova framework package for listing or renaming files in a directory.
    > The code below will list all files with .jpg files in a directory
 
    ```php 
-   if( $Enlist->source(__DIR__.'/images') ){
+   $Enlist->source(__DIR__.'/images');
+
+   if( $Enlist->sourceValid() ){
        
        $files = $Enlist->dirFiles(['jpg']); // or $Enlist->dirFiles('jpg')
        
@@ -74,13 +96,11 @@ This is a spoova framework package for listing or renaming files in a directory.
    > The code below will list all files in specified directory having only extension name without any file name
 
    ```php 
-   if( $Enlist->source(__DIR__.'/images') ) {
+   $Enlist->source(__DIR__.'/images');
 
-       $files = $Enlist->dirFiles(['.']); // or $Enlist->dirFiles('.')
-    
-       var_dump($files);
+   $files = $Enlist->dirFiles(['.']); // or $Enlist->dirFiles('.')
 
-   }
+   var_dump($files);
    ```
 
 ### List hidden files in directory and files having png extension only
@@ -88,13 +108,11 @@ This is a spoova framework package for listing or renaming files in a directory.
    > The code below will list all .png files in the source directory along with hidden files
 
    ```php 
-   if( $Enlist->source(__DIR__.'/images') ){
+   $Enlist->source(__DIR__.'/images');
 
-       $files = $Enlist->dirFiles(['.','png']);
+   $files = $Enlist->dirFiles(['.','png']);
     
-       var_dump($files); 
-
-   }
+   var_dump($files); 
    ```
 
 ### List all files in directory including hidden
@@ -102,169 +120,145 @@ This is a spoova framework package for listing or renaming files in a directory.
    > The code below will list all files including hidden files in a directory
 
    ```php 
-   if( $Enlist->source(__DIR__.'/images') ) {
+   $Enlist->source(__DIR__.'/images');
 
-       $files = $Enlist->dirFiles(['.*']); // or $Enlist->dirFiles(['.','*'])
+   $files = $Enlist->dirFiles(['.*']); // or $Enlist->dirFiles(['.','*'])
     
-       var_dump($files);
-
-   }
+   var_dump($files);
    ```
 
 ### Renaming Files in directory
 
    > Rename all file extensions in a directory to png except hidden files
    ```php
-   if( $Enlist->source(__DIR__.'/images') ) {
+   $Enlist->source(__DIR__.'/images');
 
-       $result = $Enlist->rename('png');
-       
-       var_dump($result);
+   $result = $Enlist->rename('png');
 
-   }
+   var_dump($result);
    ```
 
    > The result of a renaming can also be obtained by suppling a second argument to ```rename()``` function
    ```php
-   if( $Enlist->source(__DIR__.'/images') ){
-       
-       $Enlist->rename('png', $result);
-       
-       var_dump($result);
-       
-   }
+   $Enlist->source(__DIR__.'/images');
+
+   $Enlist->rename('png', $result);
+    
+   var_dump($result);
    ```
 
    > Rename only .jpg file extensions in a directory to png extension
    ```php
-   if( $Enlist->source(__DIR__.'/images', ['jpg']) ){
-       
-       $Enlist->rename('png', $result);
-       
-       var_dump($result);
+   $Enlist->source(__DIR__.'/images');
 
-   }
+   $Enlist->rename('png', $result);
+   
+   var_dump($result);
    ```
 
    > Rename only .jpg file names in a directory with serial numbering
    ```php
-   if( $Enlist->source(__DIR__.'/images', ['jpg']) ) {
-       
-       $Enlist->reNumber();
-       $result = $Enlist->rename();
-       
-       var_dump($result);
+   $Enlist->source(__DIR__.'/images');
 
-   }
+   $Enlist->reNumber();
+   $result = $Enlist->rename();
+    
+   var_dump($result);
    ```
 
    > Files can be renamed with serial numbers starting from a specific number using the ```startFrom()``` method
 
    ```php
-   if( $Enlist->source(__DIR__.'/images', ['jpg']) ){
+   $Enlist->source(__DIR__.'/images', ['jpg']);
 
-       $Enlist->reNumber()->startFrom(10);
-       $result = $Enlist->rename();
+   $Enlist->reNumber()->startFrom(10);
+   $result = $Enlist->rename();
 
-       var_dump($result);
-
-   }
+   var_dump($result);
    ```
 
    > Renaming file names in a directory with serial numbering with a named prefix can be done using both the ```prefix()``` and ```reNumber()``` methods
    
-   ```php
-   if( $Enlist->source(__DIR__.'/src/images') ) {
+   ```php 
+   $Enlist->source(__DIR__.'/src/images');
 
-       $Enlist->prefix('images-');
-       $Enlist->reNumber();
-       $Enlist->rename('jpg', $result);
-       
-       var_dump($result);
-
-   }
+   $Enlist->prefix('images-');
+   $Enlist->reNumber();
+   $Enlist->rename('jpg', $result);
+    
+   var_dump($result);
    ```
    
    > Spaces in file names can be replaced with another character through the  ```reSpace()``` method.
    
    ```php
-   if( $Enlist->source(__DIR__.'/src/images', ['jpg']) ) {
+   $Enlist->source(__DIR__.'/src/images', ['jpg']);
 
-       $Enlist->reSpace("_"); //changes all spaces to underscore ( i.e _ )
-       $Enlist->rename('jpg', $result);
-    
-       var_dump($result);
+   $Enlist->reSpace("_"); //changes all spaces to underscore ( i.e _ )
+   $Enlist->rename('jpg', $result);
 
-   }
+   var_dump($result);
    ```
    
    > Smart url format can be applied to file name. This will remove special characters from file names
    
    ```php
-   if( $Enlist->source(__DIR__.'/src/images', ['jpg']) ) {
+   $Enlist->source(__DIR__.'/src/images', ['jpg']);
 
-       $Enlist->reSpace("_"); //changes all spaces to underscore ( i.e _ )
-       $Enlist->rename('jpg', $result);
+   $Enlist->reSpace("_"); //changes all spaces to underscore ( i.e _ )
+   $Enlist->rename('jpg', $result);
 
-       var_dump($result);
-
-   }
+   var_dump($result);
    ```
 
    > The ```view()``` method can be used to prevent ```rename()``` from actively renaming files. Only the expected output result will be seen as array list if no error occurs
 
    ```php
-   if($Enlist->source(__DIR__.'/src/images')){
+   $Enlist->source(__DIR__.'/src/images');
 
-       $Enlist->view();
-       $Enlist->prefix('images-');
-       $Enlist->reNumber();
-       $Enlist->rename('jpg', $result);
-    
-       var_dump($result);
-
-   }
+   $Enlist->view();
+   $Enlist->prefix('images-');
+   $Enlist->reNumber();
+   $Enlist->rename('jpg', $result);
+   
+   var_dump($result);
    ```
 
-   > Errors can returned as text if debug mode is not turned on
+   > Errors can be returned as text if debug mode is not turned on
 
    ```php
-   if( $Enlist->source(__DIR__.'/src/images' )){
+   $Enlist->source(__DIR__.'/src/images' );
 
-       $Enlist->view();
-       $Enlist->prefix('image-');
-       $result = $Enlist->rename('.');
-    
-       if($result === false){
-    
-          var_dump($Enlist->error());
-    
-       }
-
+   $Enlist->view();
+   $Enlist->prefix('image-');
+   $result = $Enlist->rename('.');
+   
+   if($result === false){
+   
+       var_dump($Enlist->error());
+   
    }
    ```
 
-   > Errors can also be fetched by turning debug mode on without throwing errors. In order to do this the ```debug()``` method must be turned on before ```rename()``` is called. Finally the ```debugs()``` method will return all backtraces where error occured.
+   > Errors can also be fetched by turning debug mode on without throwing errors. In order to do this the ```debug()``` method must be turned on before ```rename()``` is called. Finally the ```debugs()``` method will return all backtraces where error occured. Note that the ```rename()``` or ```dirFiles()``` method are only executed if the specified source url is valid.
 
    ```php
    $Enlist->debug(); //turn on debugging without throwing error
-
-   if( $Enlist->source(__DIR__.'/src/images') ) {
+   
+   $Enlist->source(__DIR__.'/src/images') 
        
-       $Enlist->view(); 
-       $Enlist->prefix('image-');
-       $Enlist->rename('.', $result);
+   $Enlist->view(); 
+   $Enlist->prefix('image-');
+   $Enlist->rename('.', $result);
     
-       if(!$Enlist->debugs()){
-    
-           var_dump($result);
+   if(!$Enlist->debugs()){
+   
+       var_dump($result);
+       
+   }else{
            
-       }else{
-               
-           var_dump($Enlist->debugs());
-    
-       }
-
+       var_dump($Enlist->debugs());
+   
    }
    ```
 
@@ -293,7 +287,7 @@ This is a spoova framework package for listing or renaming files in a directory.
    }
    ```
 
-   > Throwing Errors can be enabled when the debug mode is enabled. This can be done by supplying an argument of ```"2"``` on the ```debug()``` method.
+   > Throwing errors can be enabled when the debug mode is enabled. This can be done by supplying an argument of ```"2"``` on the ```debug()``` method.
 
    ```php
    $Enlist->debug(2); //turn on debugging with ErrorException thrown
@@ -303,6 +297,7 @@ This is a spoova framework package for listing or renaming files in a directory.
    $Enlist->view(); 
    $Enlist->prefix('image-');
    $Enlist->rename('.', $result);
+
    var_dump($result);
    ```
 

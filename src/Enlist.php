@@ -184,6 +184,9 @@ class Enlist{
 	 * @return array
 	 */
 	public function dirFiles(string|array $extension = [], $fullpath = false) : array {
+
+        if(!$this->active) return [];
+
 		$url  = $this->url;
 		$files = [];
 		$ext = (array) $extension;
@@ -365,6 +368,7 @@ class Enlist{
      */
     public function withSession(string $session_name) : Enlist {
 
+        if(!$this->active) return $this;
         if(!isset($_SESSION)) session_start();
         $this->session_name = $session_name;
 
@@ -381,6 +385,7 @@ class Enlist{
      */
     public function reverse(array|null &$reversals = [], string $session_name = '') {
 
+        if(!$this->active) return ;
         if(isset($_SESSION)){    
             $session_name = (func_num_args() > 1)? $session_name : $this->session_name;
             
@@ -468,7 +473,6 @@ class Enlist{
 
         $backTraces = $this->backTrace; 
         $traces = count($backTraces);
-        $keys = ['file','line','function', 'class', 'error'];
 
         $errors = [];
 
