@@ -307,7 +307,9 @@ In certain situations where files are renamed in a way that is not desired or on
    > Allow Enlist to revert recent changes from session storage
 
    ```php
-   if( $Enlist->source(__DIR__.'/src/images') ) {
+   $Enlist->source(__DIR__.'/src/images');
+   
+   if( $Enlist->sourceValid() ) {
 
        $Enlist->withSession('unique_session_name'); //set a session storage name
        $Enlist->prefix('image-');
@@ -323,8 +325,10 @@ In certain situations where files are renamed in a way that is not desired or on
    > Session names can also be specified from the session storage. Reversals will be made only if the old filename still exists in the specified directory. Also, when a reversal 
    has been made, the stored session urls will be cleared out.
 
-   ```php
-   if( $Enlist->source(__DIR__.'/src/images') ) {
+   ```php 
+   $Enlist->source(__DIR__.'/src/images');
+
+   if( $Enlist->sourceValid() ) {
 
        $Enlist->withSession('my_enlist_session_name'); //set a session storage name
        $Enlist->prefix('image-');
