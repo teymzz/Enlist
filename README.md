@@ -346,12 +346,12 @@ In certain situations where files are renamed in a way that is not desired or on
 #### Characters and their functions 
 The list below describes arguments and their functions
 
-   ```"."```   - All hidden files only
-   ```"*"```   - All files except hidden
-   ```".*"```  - All files including hidden files 
-   ```"jpg"``` - All jpg file extensions only
+   + ```"."```   - All hidden files only
+   + ```"*"```   - All files except hidden
+   + ```".*"```  - All files including hidden files 
+   + ```"jpg"``` - All jpg file extensions only
 
-   ```['jpg', 'png']``` - All specified file extensions only
+   + ```['jpg', 'png']``` - All specified file extensions only
 
 #### Good Practices 
 It is always good to set the renaming to view mode first to check how the final result of a list of renamed files will be before proceeding to rename the item to avoid issues like merging of conflicts which can lead to loss of file. 
