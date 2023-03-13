@@ -27,7 +27,7 @@ This is a spoova framework package for listing or renaming files in a directory.
 
 ### Set a file directory
 
-   > In order to use the Enlist, the source directory must first be be specified
+   > In order to use the Enlist package, the source directory must first be be specified
 
    ```php 
    $Enlist->source(__DIR__.'/images');
@@ -140,7 +140,7 @@ This is a spoova framework package for listing or renaming files in a directory.
 
    > The result of a renaming can also be obtained by suppling a second argument to ```rename()``` function
    ```php
-   $Enlist->source(__DIR__.'/images');
+   $Enlist->source(__DIR__.'/images', "*");
 
    $Enlist->rename('png', $result);
     
@@ -149,7 +149,7 @@ This is a spoova framework package for listing or renaming files in a directory.
 
    > Rename only .jpg file extensions in a directory to png extension
    ```php
-   $Enlist->source(__DIR__.'/images');
+   $Enlist->source(__DIR__.'/images', 'jpg');
 
    $Enlist->rename('png', $result);
    
@@ -158,7 +158,7 @@ This is a spoova framework package for listing or renaming files in a directory.
 
    > Rename only .jpg file names in a directory with serial numbering
    ```php
-   $Enlist->source(__DIR__.'/images');
+   $Enlist->source(__DIR__.'/images', 'jpg');
 
    $Enlist->reNumber();
    $result = $Enlist->rename();
@@ -169,7 +169,7 @@ This is a spoova framework package for listing or renaming files in a directory.
    > Files can be renamed with serial numbers starting from a specific number using the ```startFrom()``` method
 
    ```php
-   $Enlist->source(__DIR__.'/images', ['jpg']);
+   $Enlist->source(__DIR__.'/images', 'jpg');
 
    $Enlist->reNumber()->startFrom(10);
    $result = $Enlist->rename();
@@ -177,7 +177,7 @@ This is a spoova framework package for listing or renaming files in a directory.
    var_dump($result);
    ```
 
-   > Renaming file names in a directory with serial numbering with a named prefix can be done using both the ```prefix()``` and ```reNumber()``` methods
+   > Renaming all file names in a directory with serial numbering with a named prefix can be done using both the ```prefix()``` and ```reNumber()``` methods
    
    ```php 
    $Enlist->source(__DIR__.'/src/images');
@@ -227,7 +227,7 @@ This is a spoova framework package for listing or renaming files in a directory.
    > Errors can be returned as text if debug mode is not turned on
 
    ```php
-   $Enlist->source(__DIR__.'/src/images' );
+   $Enlist->source(__DIR__.'/src/images');
 
    $Enlist->view();
    $Enlist->prefix('image-');
@@ -342,6 +342,15 @@ In certain situations where files are renamed in a way that is not desired or on
 
    }
    ```
+
+#### Characters and their functions 
+The list below describes arguments and their functions
+
+    + ```.```   - All hidden files only
+    + ```*```   - All files except hidden
+    + ```.*```  - All files including hidden files 
+    + ```jpg``` - All jpg file extensions only
+    + ```['jpg', 'png']``` - All specified file extensions only
 
 #### Good Practices 
 It is always good to set the renaming to view mode first to check how the final result of a list of renamed files will be before proceeding to rename the item to avoid issues like merging of conflicts which can lead to loss of file. 

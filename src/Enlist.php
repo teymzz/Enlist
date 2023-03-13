@@ -18,7 +18,7 @@ class Enlist{
     private bool|int $debug;
 	private bool $active = false;
 	private mixed $error = '';
-	private array|string|null $ext;
+	private array|string $ext;
 	private int $counter = 1;
 	private $espace = '';
 	private $reNumber = false;
@@ -76,7 +76,7 @@ class Enlist{
 	 * @param array|string source $ext
 	 * @return Enlist
 	 */
-	public function source($url, array|string $ext = null) : Enlist {
+	public function source($url, array|string $ext = '*') : Enlist {
        
        if(!$this->processUrl($url)){ return false; }
 
