@@ -40,24 +40,71 @@ class Enlist{
 
 	}
 
+    private function validate_extension(array &$ext = []) : bool {
+
+        $extCount = count($ext);
+
+        if($extCount > 1){
+
+            if(($extCount === 2) && (in_array('*', $ext) && in_array('.', $ext))){
+                $ext = ['.*'];
+            }elseif(in_array('*', $ext) || in_array('.*', $ext)){
+                $this->error('conflicting contents "'.$ext[0].'" with applied extension name');
+                return false;                
+            }
+
+        }
+
+        $this->error = '';
+
+        return true;
+
+    }
+
+    private function exists($item){
+
+        $ext = (array) $this->ext;
+
+       return in_array(pathinfo($item, PATHINFO_EXTENSION), $ext);
+
+    }
+
 	/**
 	 * set source path
 	 *
 	 * @param string source $url
 	 * @param array|string source $ext
-	 * @return bool
+	 * @return Enlist
 	 */
-	public function source($url, array|string $ext = null) : bool {
+	public function source($url, array|string $ext = null) : Enlist {
        
        if(!$this->processUrl($url)){ return false; }
+
+       if(func_num_args() > 1){
+
+        if(!$this->validate_extension($ext)) {
+            $this->active = false;
+            return $this;
+        }
+
+       }
 
        $this->ext  = $ext;
 
        $this->active = true;
 
-       return true; 
+       return $this; 
 
 	}
+
+    /**
+     * Returns true is the supplied source url is valid
+     *
+     * @return boolean
+     */
+    public function sourceValid() : bool {
+        return $this->active;
+    }
 
 	/**
 	 * Add a prefix to a naming convention
@@ -143,46 +190,38 @@ class Enlist{
         $ext = $ext?: ['*'];
         $dirHidden = [];
 
-        $extCount = count($ext);
+        if($this->validate_extension($ext)) {
 
-        if($extCount > 1){
-
-            if(($extCount === 2) && (in_array('*', $ext) && in_array('.', $ext))){
-                $ext = ['.*'];
-            }elseif(in_array('*', $ext) || in_array('.*', $ext)){
-                $this->error('conflicting contents "'.$ext[0].'" with applied extension name');
-                return [];                
+            $dirNormal = glob($url.'/*')?: [];
+    
+            if(!empty($ext) && ($ext[0] !== '*')){
+                $dirHidden = array_filter(glob($url.'/.*')?: [], 'is_file');
             }
+    
+            $dirFiles = array_merge($dirHidden, $dirNormal);
+    
+    
+            foreach($dirFiles as $ifile) {
+    
+                $baseName = basename($ifile);
+    
+                if(!empty($ext) and is_file($ifile)){
+                    $fileExt = pathinfo($ifile,PATHINFO_EXTENSION);
+                    if(in_array(".*", $ext) || in_array("*", $ext)){
+                        $files[] = ($fullpath === true)? $ifile : str_replace(str_replace("\\","/",__DIR__.'/'), '', $ifile);
+                    }elseif(in_array($fileExt, $ext)){
+                        $files[] = ($fullpath === true)? $ifile : str_replace(str_replace("\\","/",__DIR__.'/'), '', $ifile);
+                    }elseif(in_array('.', $ext) && (substr($baseName, 0, 1) === '.')){
+                        $files[] = ($fullpath === true)? $ifile : str_replace(str_replace("\\","/",__DIR__.'/'), '', $ifile);
+                    }
+                }elseif(empty($ext)){
+                    $files[] = $ifile;
+                }	
+    
+            } 
 
         }
 
-        $dirNormal = glob($url.'/*')?: [];
-
-        if(!empty($ext) && ($ext[0] !== '*')){
-            $dirHidden = array_filter(glob($url.'/.*')?: [], 'is_file');
-        }
-
-        $dirFiles = array_merge($dirHidden, $dirNormal);
-
-
-		foreach($dirFiles as $ifile) {
-
-            $baseName = basename($ifile);
-
-			if(!empty($ext) and is_file($ifile)){
-				$fileExt = pathinfo($ifile,PATHINFO_EXTENSION);
-                if(in_array(".*", $ext) || in_array("*", $ext)){
-					$files[] = ($fullpath === true)? $ifile : str_replace(str_replace("\\","/",__DIR__.'/'), '', $ifile);
-                }elseif(in_array($fileExt, $ext)){
-					$files[] = ($fullpath === true)? $ifile : str_replace(str_replace("\\","/",__DIR__.'/'), '', $ifile);
-				}elseif(in_array('.', $ext) && (substr($baseName, 0, 1) === '.')){
-					$files[] = ($fullpath === true)? $ifile : str_replace(str_replace("\\","/",__DIR__.'/'), '', $ifile);
-                }
-			}elseif(empty($ext)){
-				$files[] = $ifile;
-			}	
-
-		}
 		return $files;
 	}
 
@@ -198,119 +237,123 @@ class Enlist{
 	 */
 	public function rename(string|bool $finalExt = true, &$results = []) : array|false {
 
-	  if(!$this->active){ return false; }
-	  $url  = $this->url;
-	  $ext  = (array) $this->ext;
-	  $counter = $this->counter;
-	  $prefix = $this->prefix;
-	  $action = $this->action;
-	  $espace = $this->espace;
-	  $reNumber = $this->reNumber;
-      $files = []; 
-      $hiddenFiles = []; $hiddenMap = [];
+        if(!$this->active){ return false; } 
+        $url  = $this->url;
+        $ext  = (array) $this->ext;
+        $counter = $this->counter;
+        $prefix = $this->prefix;
+        $action = $this->action;
+        $espace = $this->espace;
+        $reNumber = $this->reNumber;
+        $files = []; 
+        $hiddenFiles = []; $hiddenMap = [];
 
-      $firstVal = ($ext[0] ?? '');
+        $isHidden = false;
+        $hiddenItems = ['.', '.*'];
 
-      $hiddenItems = ['.', '.*'];
+        array_map(function($extension)use($hiddenItems, &$isHidden){
 
-      if(in_array($firstVal, $hiddenItems)){
-        //only hidden
-        $hiddenFiles = array_filter(glob($url.'/.*') ?? [], 'is_file');
+            if(in_array($extension, $hiddenItems)) $isHidden = true;
 
-        $counti = 0;
-        if(count($hiddenFiles) > 1){
-            foreach($hiddenFiles as $hiddenFile){
-                $hiddenMap[$hiddenFile] = pathinfo($hiddenFile, PATHINFO_FILENAME).".".pathinfo($hiddenFile, PATHINFO_EXTENSION)?: $counti;
-                $counti++;
-            }
-        }
-      }
-
-      if($firstVal !== '.'){
-          foreach(glob($url.'/*') as $ifile) {
-    
-              if(is_file($ifile)){
-                  $files[] = $ifile;
-              }	
-    
-          }
-      }
-
-      $files = array_merge($hiddenFiles, $files);
-
-	  natsort($files);
-
-      $fUrls = []; $count = 0;
-
-	  foreach ($files as $file) {
-
-        $file_ext =  pathinfo($file, PATHINFO_EXTENSION);
-	  	$fileExt = ($finalExt === true)? $file_ext : $finalExt;
-
-        $invalidExts = ['*',':','?','|','.', ' '];
-        $excludes = ['.','*','.*'];
-
-        if((!empty($ext) && in_array($file_ext, $ext)) || ((count($ext) == '1') && (in_array($ext[0], $excludes)))) {
-            //explode the first names
-            $directory = explode("/",$file, -1);
-            $dir = implode("/", $directory);
-
-            if($reNumber){
-                $newfile =  $prefix.$counter; 
-            }else{
-                $newfile = str_replace($dir."/", '', $file);
-                $newfile = pathinfo($newfile,PATHINFO_FILENAME);
-            }
+        },$ext);
 
 
-            $newfile = ($espace)? preg_replace("/\s+/", $espace, $newfile) : $newfile;
-            if($this->smartUrl){
-                //strip off unnecessary characters from url.
-                $newfile = preg_replace('~[^0-9a-z_]+~i', '_', html_entity_decode(preg_replace('~&([a-z]{1,2})(?:acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i', '$1', htmlentities($newfile, ENT_QUOTES, 'UTF-8')), ENT_QUOTES, 'UTF-8'));
-                $newfile = rtrim(preg_replace('/_+/', '_', $newfile),"_");
-            }	  			
-            
+        if($isHidden){
+            //only hidden
+            $hiddenFiles = array_filter(glob($url.'/.*') ?? [], 'is_file');
 
-            $newfile = $dir.'/'.$newfile.'.'.$fileExt;
-            if(array_key_exists($file, $hiddenMap)) { 
-                $newfile = $dir.'/'.$hiddenMap[$file];            
-
-                if($reNumber) $newfile .= $counter;
-                if($fileExt && ($fileExt !== pathinfo($newfile, PATHINFO_EXTENSION))) $newfile .= ".".$fileExt;                
-                $lasthChar = substr($newfile, -1);
-                if(in_array($lasthChar, $invalidExts)){
-                    $this->error('invalid character file extension "'.$lasthChar.'" supplied on "Elist::rename()" for renaming "'.basename($file).'"'); 
-                    return false;
-                }                
-            }
-
-            $lastChar = substr($fileExt, -1);
-
-            if(in_array($lastChar, $invalidExts)){
-               $this->error('invalid character file extension "'.$lasthChar.'" supplied on "Elist::rename()" for renaming "'.basename($file).'"'); 
-               return false;
-            }
-            
-            $fUrls[$file] = $newfile;
-
-            if($action != 'view'){
-                if(strtolower($file) !== strtolower($newfile)){
-                    if(isset($this->session_name))$_SESSION[$this->session_name][$file] = $newfile;
-                    rename($file, $newfile);
+            $counti = 0;
+            if(count($hiddenFiles) > 1){
+                foreach($hiddenFiles as $hiddenFile){
+                    $hiddenMap[$hiddenFile] = pathinfo($hiddenFile, PATHINFO_FILENAME).".".pathinfo($hiddenFile, PATHINFO_EXTENSION)?: $counti;
+                    $counti++;
                 }
             }
-        }elseif(empty($ext)){
-
-            if($count == 0){
-                $this->error('Since "Enlist::source(#2)" has no definitive extension name, "Enlist::rename()" cannot be used');
-                return false;
-            }
         }
-        $count++;
-	  	$counter++;
-	  }
-      $results = [];
-	  return $fUrls;
+
+        if(!preg_match('@^[a-zA-Z0-9_]+$@', $finalExt, $matches)){
+            $this->error('invalid character file extension "'.$finalExt.'" supplied on "Elist::rename(#1)"'); 
+            return false;
+        }
+
+
+        $files = array_filter(glob($url."/*"), [$this, 'exists']);
+
+        $files = array_merge($hiddenFiles, $files);
+
+        natsort($files);
+
+        $fUrls = []; $count = 0;
+
+        foreach ($files as $file) {
+
+            $file_ext =  pathinfo($file, PATHINFO_EXTENSION);
+            $fileExt = ($finalExt === true)? $file_ext : $finalExt;
+
+            $invalidExts = ['*',':','?','|','.', ' '];
+            $excludes = ['.','*','.*'];
+
+            if((!empty($ext) && in_array($file_ext, $ext)) || ((in_array($ext[0], $excludes)))) {
+                //explode the first names
+                $directory = explode("/",$file, -1);
+                $dir = implode("/", $directory);
+
+                if($reNumber){
+                    $newfile =  $prefix.$counter; 
+                }else{
+                    $newfile = str_replace($dir."/", '', $file);
+                    $newfile = pathinfo($newfile,PATHINFO_FILENAME);
+                }
+
+                $newfile = ($espace)? preg_replace("/\s+/", $espace, $newfile) : $newfile;
+
+                if($this->smartUrl){
+                    //strip off unnecessary characters from url.
+                    $newfile = preg_replace('~[^0-9a-z_]+~i', '_', html_entity_decode(preg_replace('~&([a-z]{1,2})(?:acute|cedil|circ|grave|lig|orn|ring|slash|th|tilde|uml);~i', '$1', htmlentities($newfile, ENT_QUOTES, 'UTF-8')), ENT_QUOTES, 'UTF-8'));
+                    $newfile = rtrim(preg_replace('/_+/', '_', $newfile),"_");
+                }	  
+
+                $newfile = $dir.'/'.$newfile.'.'.$fileExt;
+
+                if(array_key_exists($file, $hiddenMap)) { 
+                    $newfile = $dir.'/'.$hiddenMap[$file];            
+
+                    if($reNumber) $newfile .= $counter;
+                    if($fileExt && ($fileExt !== pathinfo($newfile, PATHINFO_EXTENSION))) $newfile .= ".".$fileExt;                
+                    $lasthChar = substr($newfile, -1);
+                    if(in_array($lasthChar, $invalidExts)){
+                        $this->error('invalid character file extension "'.$lasthChar.'" supplied on "Elist::rename()" for renaming "'.basename($file).'"'); 
+                        return false;
+                    }                
+                }
+
+                $lastChar = substr($fileExt, -1);
+
+                if(in_array($lastChar, $invalidExts)){
+                    $this->error('invalid character file extension "'.$lastChar.'" supplied on "Elist::rename()" for renaming "'.basename($file).'"'); 
+                    return false;
+                }
+
+                $fUrls[$file] = $newfile;
+
+                if($action != 'view'){
+                    if(strtolower($file) !== strtolower($newfile)){
+                        if(isset($this->session_name))$_SESSION[$this->session_name][$file] = $newfile;
+                        rename($file, $newfile);
+                    }
+                }
+            }elseif(empty($ext)){
+
+                if($count == 0){
+                    $this->error('Since "Enlist::source(#2)" has no definitive extension name, "Enlist::rename()" cannot be used');
+                    return false;
+                }
+            }
+            $count++;
+            $counter++;
+	    }
+  
+        return $results = $fUrls;
       
 	}
 
