@@ -224,6 +224,21 @@ This is a spoova framework package for listing or renaming files in a directory.
    var_dump($result);
    ```
 
+#### Getting Data 
+The ```data()``` method can be used to fetch the resulting data when any of the ```dirFiles()```, ```rename()``` or ```reverse()``` method is used. 
+
+    ```php 
+    $Enlist->source(__DIR__.'/src/images')->view();
+
+    $Enlist->dirFiles();
+    $Enlist->data($dirFiles); //get data returned by dirFiles() method into $dirFiles
+
+    $Enlist->rename('jpg');
+    $Enlist->data($renamed); //get data returned by rename() method into $renamed
+    ```
+
+#### Handling Errors 
+
    > Errors can be returned as text if debug mode is not turned on
 
    ```php
@@ -301,6 +316,23 @@ This is a spoova framework package for listing or renaming files in a directory.
    $Enlist->rename('.', $result);
 
    var_dump($result);
+   ```
+
+   > The debug method can also help to keep track of errors when turned off
+
+   ```php 
+   $Enlist->debug();
+   $Enlist->source(__DIR__.'/src/images')->view();
+
+   $Enlist->dirFiles();
+   $Enlist->data($dirFiles); //get data returned by dirFiles() method into $dirFiles
+
+   $Enlist->rename('jpg');
+   $Enlist->data($renamed); //get data returned by rename() method into $renamed
+
+   $Enlist->debugs($debugs); //get first error returned into $debugs
+   
+   var_dump($result);    
    ```
 
 ### Working with session 

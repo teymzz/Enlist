@@ -18,13 +18,14 @@ class Enlist{
     private bool|int $debug;
 	private bool $active = false;
 	private mixed $error = '';
-	private array|string $ext;
+	private array $ext;
 	private int $counter = 1;
 	private $espace = '';
 	private $reNumber = false;
 	public bool $smartUrl = false;
 	public string $session_name;
     public array $backTrace = [];
+    public array $result = [];
 
 	private function processUrl($url){
        
@@ -63,7 +64,7 @@ class Enlist{
 
     private function exists($item){
 
-        $ext = (array) $this->ext;
+        $ext = $this->ext;
 
        return in_array(pathinfo($item, PATHINFO_EXTENSION), $ext);
 
@@ -77,8 +78,12 @@ class Enlist{
 	 * @return Enlist
 	 */
 	public function source($url, array|string $ext = '*') : Enlist {
+
+       $this->result = [];
        
-       if(!$this->processUrl($url)){ return false; }
+       if(!$this->processUrl($url)){ return $this; }
+
+       $ext = (array) $ext;
 
        if(func_num_args() > 1){
 
@@ -186,6 +191,7 @@ class Enlist{
 	public function dirFiles(string|array $extension = [], $fullpath = false) : array {
 
         if(!$this->active) return [];
+        $this->result = [];
 
 		$url  = $this->url;
 		$files = [];
@@ -225,7 +231,7 @@ class Enlist{
 
         }
 
-		return $files;
+		return $this->result = $files;
 	}
 
 	/**
@@ -241,8 +247,9 @@ class Enlist{
 	public function rename(string|bool $finalExt = true, &$results = []) : array|false {
 
         if(!$this->active){ return false; } 
+        $this->result = [];
         $url  = $this->url;
-        $ext  = (array) $this->ext;
+        $ext  = $this->ext;
         $counter = $this->counter;
         $prefix = $this->prefix;
         $action = $this->action;
@@ -280,7 +287,13 @@ class Enlist{
         }
 
 
-        $files = array_filter(glob($url."/*"), [$this, 'exists']);
+        $all = glob($url."/*");
+
+        if(in_array("*",$ext) || in_array(".*", $ext)){
+            $files = $all;
+        }else{
+            $files = array_filter($all, [$this, 'exists']);
+        }
 
         $files = array_merge($hiddenFiles, $files);
 
@@ -355,8 +368,8 @@ class Enlist{
             $count++;
             $counter++;
 	    }
-  
-        return $results = $fUrls;
+
+        return $results = $this->result = $fUrls;
       
 	}
 
@@ -399,10 +412,24 @@ class Enlist{
                 }
                 
             }
+
+            $this->result = $reversals;
     
             if($reversed_items) unset($_SESSION[$this->session_name]);
         }
         
+    }
+
+    /**
+     * This returns the last data obtained for dirFiles, rename and reverse method depending on if the 
+     * source directory url is valid.
+     *
+     * @return void
+     */
+    public function data(&$data) {
+
+        return $data = $this->result;
+
     }
 
 	/**
